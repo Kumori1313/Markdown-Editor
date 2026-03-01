@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'" />
+  <title>Markdown Editor</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="toolbar">
+    <label for="font-select">Font:</label>
+    <select id="font-select">
+      <option value="sans">Sans-Serif</option>
+      <option value="serif">Serif</option>
+      <option value="mono">Monospace</option>
+    </select>
+    <span id="mode-badge">RAW</span>
+    <span id="file-name">No file open</span>
+  </div>
+
+  <textarea id="editor" spellcheck="false" placeholder="Open a file to begin editing…"></textarea>
+  <div id="preview" hidden></div>
+
+  <div id="status-bar">
+    <span id="encoding-label">—</span>
+    <span id="modified-label"></span>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

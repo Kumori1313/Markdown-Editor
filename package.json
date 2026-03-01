@@ -1,0 +1,25 @@
+{
+  "name": "markdown-editor",
+  "version": "0.2.0",
+  "description": "Cross-platform Markdown viewer/editor built with Electron and ProseMirror.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "chardet": "^2.1.1",
+    "electron": "^40.6.1",
+    "iconv-lite": "^0.7.2",
+    "markdown-it": "^14.1.1",
+    "prosemirror-model": "^1.25.4",
+    "prosemirror-state": "^1.4.4",
+    "prosemirror-view": "^1.41.6"
+  },
+  "devDependencies": {
+    "electron-builder": "^26.8.1"
+  }
+}
