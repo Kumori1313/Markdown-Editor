@@ -29,16 +29,19 @@ fontSelect.addEventListener('change', () => {
 function toggleView() {
   isPreview = !isPreview;
   if (isPreview) {
-    preview.innerHTML = window.api.renderMarkdown(editor.value);
+    window.api.setEditorContent(editor.value);
     editor.hidden = true;
     preview.hidden = false;
-    modeBadge.textContent = 'PREVIEW';
+    modeBadge.textContent = 'WYSIWYG';
     modeBadge.classList.add('preview-mode');
+    window.api.focusPMEditor();
   } else {
+    editor.value = window.api.getEditorContent();
     preview.hidden = true;
     editor.hidden = false;
     modeBadge.textContent = 'RAW';
     modeBadge.classList.remove('preview-mode');
+    editor.focus();
   }
 }
 
@@ -47,6 +50,13 @@ window.api.onMenuToggleView(toggleView);
 // --- Modified tracking ---
 
 editor.addEventListener('input', () => {
+  if (!isModified) {
+    isModified = true;
+    modifiedLabel.textContent = 'Modified';
+  }
+});
+
+window.api.onPMChange(() => {
   if (!isModified) {
     isModified = true;
     modifiedLabel.textContent = 'Modified';
@@ -67,18 +77,22 @@ window.api.onFileOpened(({ content, filePath, encoding }) => {
   encodingLabel.textContent = encoding;
   setClean();
   if (isPreview) {
-    preview.innerHTML = window.api.renderMarkdown(content);
+    window.api.setEditorContent(content);
   }
 });
 
 // --- Save ---
+
+function getContent() {
+  return isPreview ? window.api.getEditorContent() : editor.value;
+}
 
 async function save() {
   if (!currentFilePath) {
     await saveAs();
     return;
   }
-  const result = await window.api.saveFile(editor.value, currentFilePath);
+  const result = await window.api.saveFile(getContent(), currentFilePath);
   if (result.success) {
     setClean();
   } else {
@@ -87,7 +101,7 @@ async function save() {
 }
 
 async function saveAs() {
-  const result = await window.api.saveFileAs(editor.value);
+  const result = await window.api.saveFileAs(getContent());
   if (result.success) {
     currentFilePath = result.filePath;
     fileName.textContent = result.filePath.split(/[\\/]/).pop();

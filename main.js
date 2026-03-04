@@ -19,6 +19,7 @@ function createWindow() {
   });
 
   mainWindow.loadFile('index.html');
+  mainWindow.webContents.openDevTools();
   buildMenu();
 }
 
@@ -38,7 +39,7 @@ function buildMenu() {
       label: 'View',
       submenu: [
         {
-          label: 'Toggle Raw / Preview',
+          label: 'Toggle Raw / WYSIWYG',
           accelerator: 'CmdOrCtrl+M',
           click: () => mainWindow.webContents.send('menu-toggle-view'),
         },
