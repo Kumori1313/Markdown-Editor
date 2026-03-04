@@ -104,7 +104,45 @@ body {
   tab-size: 4;
 }
 
-/* Preview */
+/* ProseMirror editor base */
+.ProseMirror {
+  position: relative;
+  outline: none;
+  min-height: 100%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  white-space: break-spaces;
+  -webkit-font-variant-ligatures: none;
+  font-variant-ligatures: none;
+}
+
+.ProseMirror p { margin: 0.7em 0; }
+.ProseMirror p:first-child { margin-top: 0; }
+
+.ProseMirror li { position: relative; }
+
+.ProseMirror-selectednode {
+  outline: 2px solid var(--accent);
+}
+
+.ProseMirror-hideselection *::selection { background: transparent; }
+.ProseMirror-hideselection *::-moz-selection { background: transparent; }
+.ProseMirror-hideselection { caret-color: transparent; }
+
+/* Table cell editing (prosemirror-tables) */
+.ProseMirror th, .ProseMirror td { position: relative; }
+.ProseMirror th > p, .ProseMirror td > p { margin: 0; }
+
+.selectedCell::after {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0; right: 0; top: 0; bottom: 0;
+  background: rgba(86, 156, 214, 0.2);
+  pointer-events: none;
+}
+
+/* Preview container */
 #preview {
   flex: 1;
   overflow-y: auto;
