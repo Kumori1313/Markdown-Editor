@@ -90,14 +90,14 @@ function initProseMirror(container) {
         node.forEach(row => {
           const cells = [];
           row.forEach(cell => {
-            const savedOut     = state.out;
-            const savedAtBlank = state.atBlank;
-            state.out     = '';
-            state.atBlank = true;
+            // Render cell content in isolation by saving/restoring state.out.
+            // Do NOT touch state.atBlank — it is a method in modern
+            // prosemirror-markdown and overwriting it corrupts the serializer.
+            const savedOut = state.out;
+            state.out = '';
             if (cell.firstChild) state.renderInline(cell.firstChild);
             cells.push(' ' + state.out.trim() + ' ');
-            state.out     = savedOut;
-            state.atBlank = savedAtBlank;
+            state.out = savedOut;
           });
           state.write('|' + cells.join('|') + '|\n');
           if (firstRow && row.firstChild && row.firstChild.type.name === 'table_header') {
@@ -164,7 +164,12 @@ contextBridge.exposeInMainWorld('api', {
   },
   getEditorContent: () => {
     if (!pmView) return '';
-    return mdSerializer.serialize(pmView.state.doc);
+    try {
+      return mdSerializer.serialize(pmView.state.doc);
+    } catch (err) {
+      console.error('[preload] serialize failed:', err);
+      return '';
+    }
   },
   onPMChange:    (cb) => { pmChangeCallback = cb; },
   focusPMEditor: ()   => { if (pmView) pmView.focus(); },
