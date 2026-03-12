@@ -20,6 +20,17 @@ function createWindow() {
 
   mainWindow.loadFile('index.html');
   mainWindow.webContents.openDevTools();
+
+  // Intercept Ctrl+M before it reaches the renderer or native menu.
+  // Menu accelerators can fail when contenteditable (ProseMirror) has focus;
+  // before-input-event fires reliably regardless of focused element.
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.type === 'keyDown' && (input.control || input.meta) && input.key.toLowerCase() === 'm') {
+      event.preventDefault();
+      mainWindow.webContents.send('menu-toggle-view');
+    }
+  });
+
   buildMenu();
 }
 
@@ -41,6 +52,7 @@ function buildMenu() {
         {
           label: 'Toggle Raw / WYSIWYG',
           accelerator: 'CmdOrCtrl+M',
+          registerAccelerator: false,
           click: () => mainWindow.webContents.send('menu-toggle-view'),
         },
       ],

@@ -108,7 +108,7 @@ body {
 .ProseMirror {
   position: relative;
   outline: none;
-  min-height: 100%;
+  min-height: 0;
   word-wrap: break-word;
   white-space: pre-wrap;
   white-space: break-spaces;

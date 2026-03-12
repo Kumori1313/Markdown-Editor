@@ -9,6 +9,8 @@ const modifiedLabel = document.getElementById('modified-label');
 let currentFilePath = null;
 let isModified = false;
 let isPreview = false;
+let savedSelectionStart = 0;
+let savedScrollTop = 0;
 
 // --- Font switching ---
 
@@ -29,16 +31,21 @@ fontSelect.addEventListener('change', () => {
 function toggleView() {
   isPreview = !isPreview;
   if (isPreview) {
+    savedSelectionStart = editor.selectionStart;
+    savedScrollTop = editor.scrollTop;
     window.api.setEditorContent(editor.value);
-    editor.hidden = true;
-    preview.hidden = false;
+    editor.style.display = 'none';
+    preview.style.display = '';
     modeBadge.textContent = 'WYSIWYG';
     modeBadge.classList.add('preview-mode');
     window.api.focusPMEditor();
   } else {
     editor.value = window.api.getEditorContent();
-    preview.hidden = true;
-    editor.hidden = false;
+    preview.style.display = 'none';
+    editor.style.display = '';
+    const pos = Math.min(savedSelectionStart, editor.value.length);
+    editor.setSelectionRange(pos, pos);
+    editor.scrollTop = savedScrollTop;
     modeBadge.textContent = 'RAW';
     modeBadge.classList.remove('preview-mode');
     editor.focus();
