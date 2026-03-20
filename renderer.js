@@ -3,10 +3,14 @@ const preview = document.getElementById('preview');
 const fontSelect = document.getElementById('font-select');
 const fileName = document.getElementById('file-name');
 const modeBadge = document.getElementById('mode-badge');
-const encodingLabel = document.getElementById('encoding-label');
+const encodingSelect = document.getElementById('encoding-select');
+const lineEndingSelect = document.getElementById('line-ending-select');
+const fileTypeLabel = document.getElementById('file-type-label');
 const modifiedLabel = document.getElementById('modified-label');
 
 let currentFilePath = null;
+let currentFileType = 'md';
+let currentEncoding = 'UTF-8';
 let isModified = false;
 let isPreview = false;
 let savedSelectionStart = 0;
@@ -29,6 +33,9 @@ fontSelect.addEventListener('change', () => {
 // --- View toggle ---
 
 function toggleView() {
+  // WYSIWYG is only available for Markdown files
+  if (currentFileType === 'txt') return;
+
   isPreview = !isPreview;
   if (isPreview) {
     savedSelectionStart = editor.selectionStart;
@@ -75,15 +82,77 @@ function setClean() {
   modifiedLabel.textContent = '';
 }
 
+// --- File type helpers ---
+
+function setFileType(type) {
+  currentFileType = type;
+  fileTypeLabel.textContent = type === 'txt' ? 'TXT' : 'MD';
+
+  // Force back to raw mode when switching to plaintext
+  if (type === 'txt' && isPreview) {
+    editor.value = window.api.getEditorContent();
+    preview.style.display = 'none';
+    editor.style.display = '';
+    isPreview = false;
+    modeBadge.textContent = 'RAW';
+    modeBadge.classList.remove('preview-mode');
+  }
+
+  // Hide the mode badge for plaintext since WYSIWYG is unavailable
+  modeBadge.style.display = type === 'txt' ? 'none' : '';
+}
+
+// --- Encoding re-decode ---
+
+encodingSelect.addEventListener('change', async () => {
+  if (!currentFilePath) return;
+
+  // Force back to raw mode before re-decoding — Markdown round-tripping
+  // through ProseMirror can drop characters that don't survive serialization.
+  if (isPreview) {
+    editor.value = window.api.getEditorContent();
+    preview.style.display = 'none';
+    editor.style.display = '';
+    isPreview = false;
+    modeBadge.textContent = 'RAW';
+    modeBadge.classList.remove('preview-mode');
+  }
+
+  const result = await window.api.reDecodeFile(encodingSelect.value);
+  if (result.success) {
+    currentEncoding = encodingSelect.value;
+    editor.value = result.content;
+    lineEndingSelect.value = result.lineEnding;
+    setClean();
+  } else {
+    alert(`Re-decode failed:\n${result.error}`);
+    encodingSelect.value = currentEncoding;
+  }
+});
+
 // --- File open ---
 
-window.api.onFileOpened(({ content, filePath, encoding }) => {
+window.api.onFileOpened(({ content, filePath, encoding, lineEnding, fileType }) => {
   editor.value = content;
   currentFilePath = filePath;
   fileName.textContent = filePath.split(/[\\/]/).pop();
-  encodingLabel.textContent = encoding;
   setClean();
-  if (isPreview) {
+
+  // Set encoding dropdown — add option if not already present
+  const encodingExists = Array.from(encodingSelect.options).some(o => o.value === encoding);
+  if (!encodingExists) {
+    const opt = document.createElement('option');
+    opt.value = encoding;
+    opt.textContent = encoding;
+    encodingSelect.appendChild(opt);
+  }
+  encodingSelect.value = encoding;
+  currentEncoding = encoding;
+
+  lineEndingSelect.value = lineEnding || 'LF';
+  setFileType(fileType || 'md');
+
+  if (isPreview && currentFileType === 'md') {
     window.api.setEditorContent(content);
   }
 });
@@ -99,7 +168,12 @@ async function save() {
     await saveAs();
     return;
   }
-  const result = await window.api.saveFile(getContent(), currentFilePath);
+  const result = await window.api.saveFile(
+    getContent(),
+    currentFilePath,
+    encodingSelect.value,
+    lineEndingSelect.value,
+  );
   if (result.success) {
     setClean();
   } else {
@@ -108,10 +182,16 @@ async function save() {
 }
 
 async function saveAs() {
-  const result = await window.api.saveFileAs(getContent());
+  const result = await window.api.saveFileAs(
+    getContent(),
+    encodingSelect.value,
+    lineEndingSelect.value,
+    currentFileType,
+  );
   if (result.success) {
     currentFilePath = result.filePath;
     fileName.textContent = result.filePath.split(/[\\/]/).pop();
+    setFileType(result.fileType || 'md');
     setClean();
   } else if (!result.canceled) {
     alert(`Save failed:\n${result.error}`);

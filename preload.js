@@ -154,8 +154,9 @@ contextBridge.exposeInMainWorld('api', {
   onMenuSaveAs:     (cb) => ipcRenderer.on('menu-save-as',     () => cb()),
   onMenuToggleView: (cb) => ipcRenderer.on('menu-toggle-view', () => cb()),
 
-  saveFile:   (content, filePath) => ipcRenderer.invoke('save-file',    { content, filePath }),
-  saveFileAs: (content)           => ipcRenderer.invoke('save-file-as', { content }),
+  saveFile:   (content, filePath, encoding, lineEnding) => ipcRenderer.invoke('save-file',    { content, filePath, encoding, lineEnding }),
+  saveFileAs: (content, encoding, lineEnding, fileType) => ipcRenderer.invoke('save-file-as', { content, encoding, lineEnding, fileType }),
+  reDecodeFile: (encoding) => ipcRenderer.invoke('re-decode-file', { encoding }),
 
   setEditorContent: (markdown) => {
     if (!pmView) return;
