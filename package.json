@@ -1,6 +1,6 @@
 {
   "name": "markdown-editor",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Cross-platform Markdown viewer/editor built with Electron and ProseMirror.",
   "main": "main.js",
   "scripts": {

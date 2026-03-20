@@ -22,7 +22,25 @@
   <div id="preview" style="display:none"></div>
 
   <div id="status-bar">
-    <span id="encoding-label">—</span>
+    <span id="file-type-label">—</span>
+    <select id="encoding-select">
+      <option value="UTF-8">UTF-8</option>
+      <option value="ASCII">ASCII</option>
+      <option value="ISO-8859-1">ISO-8859-1</option>
+      <option value="windows-1252">Windows-1252</option>
+      <option value="Shift_JIS">Shift_JIS</option>
+      <option value="EUC-JP">EUC-JP</option>
+      <option value="GB2312">GB2312</option>
+      <option value="Big5">Big5</option>
+      <option value="EUC-KR">EUC-KR</option>
+      <option value="UTF-16LE">UTF-16LE</option>
+      <option value="UTF-16BE">UTF-16BE</option>
+    </select>
+    <select id="line-ending-select">
+      <option value="LF">LF</option>
+      <option value="CRLF">CRLF</option>
+      <option value="CR">CR</option>
+    </select>
     <span id="modified-label"></span>
   </div>
 
